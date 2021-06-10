@@ -12,7 +12,7 @@ Setup a local kubernetes environment if you do not already have one available to
 Clone the following repo that will be used for this tutorial:
 
 ```shell
-git clone https://github.com/Contrast-Security-OSS/spring-petclinic.git
+git clone https://github.com/Contrast-Security-OSS/demo-petclinic.git
 ```
 
 ## Building and setting up the Java application's image w/Contrast
