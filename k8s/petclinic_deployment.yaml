@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: petclinic
+spec: 
+  replicas: 1
+  selector: 
+    matchLabels: 
+      component: petclinic
+  template:
+    metadata:
+      labels:
+        component: petclinic
+    spec:
+      containers:
+      - name: petclinic
+        image: contrastsecuritydemo/spring-petclinic:k8s
+        ports: 
+          - containerPort: 8080
+        envFrom:
+          - configMapRef:
+              name: contrast-config  
+        # Volume Mount for contrast_security.yaml  
+        volumeMounts:
+        - name: contrast-security
+          readOnly: false
+          mountPath: "/etc/contrast"
+        resources:
+          requests:
+            cpu: 1.0
+            memory: 2Gi
+          limits:
+            cpu: 2.0
+            memory: 4Gi
+      # Volume from contrast-security secret     
+      volumes:
+      - name: contrast-security
+        secret:
+          secretName: contrast-security
+
+
