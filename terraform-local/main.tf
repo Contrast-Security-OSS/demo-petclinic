@@ -1,6 +1,11 @@
-#Terraform `provider` section is required since the `azurerm` provider update to 2.0+
-provider "azurerm" {
-  features {}
+
+terraform {
+  required_providers {
+    docker = {
+      source  = "kreuzwerker/docker"
+      version = "2.15.0"
+    }
+  }
 }
 
 # Configure the Docker provider
@@ -14,7 +19,7 @@ data "external" "yaml" {
 
 # Create a container
 resource "docker_container" "spring-petclinic" {
-  image = "contrastsecuritydemo/spring-petclinic:1.5.1"
+  image = "spring-petclinic:1.5.1"
   name  = "spring-petclinic"
 
   ports {

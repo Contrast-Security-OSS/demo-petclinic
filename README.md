@@ -25,7 +25,22 @@ You can run PetClinic within a Docker container.
 1. Run the container using `docker run -v $PWD/contrast_security.yaml:/etc/contrast/java/contrast_security.yaml -p 8080:8080 spring-petclinic:1.5.1`
 1. Browse the application at http://localhost:8080/
 
-# Running in Azure (Azure Container Instance):
+# Running in Terraform with Docker locally
+
+You can run PetClinic within a Docker container using Terraform. 
+
+1. Place a `contrast_security.yaml` file into the `terraform-local` folder.
+1. Install Terraform from here: https://www.terraform.io/downloads.html.
+1. Install PyYAML using `pip install PyYAML`.
+1. Build the PetClinic container image using `./1-Build-Docker-Image.sh`. The Contrast agent is added automatically during the Docker build process.
+1. Open a terminal and cd to the `terraform-local` folder.
+1. Run `terraform init` to download the required plugins.
+1. Run `terraform plan` and check the output for errors.
+1. Run `terraform apply` to run the image in Docker, this will output the web address for the application.
+1. Run `terraform destroy` when you would like to stop the app service and release the resources.
+1. Browse the application at http://localhost:8081/
+
+# Running in Azure (Container Image) using Terraform
 
 ## Pre-Requisites
 
