@@ -33,7 +33,17 @@ resource "azurerm_container_group" "app" {
       protocol = "TCP"
     }
     environment_variables = {
-      JAVA_TOOL_OPTIONS = "-javaagent:/opt/contrast/contrast.jar -Dcontrast.application.name=spring-petclinic -Dcontrast.api.url=${data.external.yaml.result.url} -Dcontrast.api.api_key=${data.external.yaml.result.api_key} -Dcontrast.api.service_key=${data.external.yaml.result.service_key} -Dcontrast.api.user_name=${data.external.yaml.result.user_name} -Dcontrast.standalone.appname=${var.appname} -Dcontrast.server.name=${var.servername} -Dcontrast.server.environment=${var.environment} -Dcontrast.application.session_metadata=${var.session_metadata} -Dcontrast.application.tags=${var.apptags} -Dcontrast.server.tags=${var.servertags}"
+      JAVA_TOOL_OPTIONS = "-javaagent:/opt/contrast/contrast.jar"
+      CONTRAST__API__API_KEY=data.external.yaml.result.api_key
+      CONTRAST__API__SERVICE_KEY=data.external.yaml.result.service_key
+      CONTRAST__API__USER_NAME=data.external.yaml.result.user_name
+      CONTRAST__API__URL=data.external.yaml.result.url
+      CONTRAST__APPLICATION__NAME=var.appname
+      CONTRAST__APPLICATION__SESSION_METADATA=var.session_metadata
+      CONTRAST__APPLICATION__TAGS=var.apptags
+      CONTRAST__SERVER__NAME=var.servername
+      CONTRAST__SERVER__ENVIRONMENT=var.environment
+      CONTRAST__SERVER__TAGS=var.servertags
     }
   }
 }
