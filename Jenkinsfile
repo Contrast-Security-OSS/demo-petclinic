@@ -27,7 +27,8 @@ pipeline {
                 }
                 sh """
                 terraform init
-                npm i puppeteer
+                npm install @playwright/test
+                npm init playwright@latest -- --quiet --browser=chromium
                 """
             }
         }
@@ -44,8 +45,11 @@ pipeline {
                             export ARM_CLIENT_SECRET=$AZURE_CLIENT_SECRET
                             export ARM_SUBSCRIPTION_ID=$AZURE_SUBSCRIPTION_ID
                             export ARM_TENANT_ID=$AZURE_TENANT_ID
-
-                            terraform apply -auto-approve -var 'location=$location' -var 'initials=$initials' -var 'environment=qa' -var 'servername=jenkins' -var 'session_metadata="branchName=${env.GIT_BRANCH},buildNumber=${BUILD_NUMBER},commitHash=${env.GIT_SHORT_COMMIT},version=1.5.1"'
+                            terraform apply -auto-approve -var 'location=$location' \
+                                -var 'initials=$initials' \
+                                -var 'environment=qa' \
+                                -var 'servername=jenkins' \
+                                -var 'session_metadata=branchName=qa,committer=Ryan,buildNumber=${env.BUILD_NUMBER}'
                             """
                         } catch (Exception e) {
                             echo "Terraform refresh failed, deleting state"
@@ -67,13 +71,85 @@ pipeline {
               }
           }
         }
-        stage('exercise') {
+        stage('exercise - qa') {
             steps {
                 timeout(20) {
                     sh """
                     FQDN=\$(terraform output fqdn)
-                    BASEURL=\$FQDN node exercise.js
+                    BASEURL=\$FQDN npx playwright test
                     """
+                }
+            }
+        }
+        stage('provision - dev') {
+            steps {
+                script {
+                    withCredentials([azureServicePrincipal('ContrastAzureSponsored')]) {
+                        try {
+                            sh """
+                            export ARM_CLIENT_ID=$AZURE_CLIENT_ID
+                            export ARM_CLIENT_SECRET=$AZURE_CLIENT_SECRET
+                            export ARM_SUBSCRIPTION_ID=$AZURE_SUBSCRIPTION_ID
+                            export ARM_TENANT_ID=$AZURE_TENANT_ID
+                            terraform apply -auto-approve -var 'location=$location' \
+                                -var 'initials=$initials' \
+                                -var 'environment=development' \
+                                -var 'servername=Macbook-Pro' \
+                                -var 'session_metadata=branchName=feat: improve owner search,committer=Jake,buildNumber=${env.BUILD_NUMBER}'     
+                            """
+                        } catch (Exception e) {
+                            echo "Terraform refresh failed, deleting state"
+                            sh "rm -rf terraform.tfstate"
+                            currentBuild.result = "FAILURE"
+                            error("Aborting the build.")
+                        }
+                    }
+                }
+            }
+        }
+        stage('exercise - dev') {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'ABORTED') {
+                    timeout(20) {
+                        sh """
+                        FQDN=\$(terraform output fqdn)
+                        BASEURL=\$FQDN npx playwright test
+                        """
+                    }
+                }
+            }
+        }
+        stage('provision - prod') {
+            steps {
+                script {
+                    withCredentials([azureServicePrincipal('ContrastAzureSponsored')]) {
+                        try {
+                            sh """
+                            export ARM_CLIENT_ID=$AZURE_CLIENT_ID
+                            export ARM_CLIENT_SECRET=$AZURE_CLIENT_SECRET
+                            export ARM_SUBSCRIPTION_ID=$AZURE_SUBSCRIPTION_ID
+                            export ARM_TENANT_ID=$AZURE_TENANT_ID
+                            terraform apply -auto-approve -var 'location=$location' -var 'initials=$initials' -var 'environment=production' -var 'servername=Prod-01'
+                            """
+                        } catch (Exception e) {
+                            echo "Terraform refresh failed, deleting state"
+                            sh "rm -rf terraform.tfstate"
+                            currentBuild.result = "FAILURE"
+                            error("Aborting the build.")
+                        }
+                    }
+                }
+            }
+        }
+        stage('exercise - prod') {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'ABORTED') {
+                    timeout(20) {
+                        sh """
+                        FQDN=\$(terraform output fqdn)
+                        BASEURL=\$FQDN npx playwright test e2e/attack.spec.ts
+                        """
+                    }
                 }
             }
         }

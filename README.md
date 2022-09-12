@@ -12,7 +12,7 @@ You can run PetClinic locally on any machine with Java 1.8 RE installed.
 1. Place a `contrast.jar` into the application's root folder.
 1. Run the application using: 
 ```sh
-java -javaagent:contrast.jar -Dcontrast.config.path=contrast_security.yaml  -Dcontrast.agent.java.standalone_app_name=spring-petclinic -jar spring-petclinic-1.5.1.jar [--server.port=8080] [--server.address=localhost] 
+java -javaagent:contrast.jar -Dcontrast.config.path=contrast_security.yaml  -Dcontrast.application.name=spring-petclinic -jar spring-petclinic-1.5.1.jar [--server.port=8080] [--server.address=localhost] 
 ```
 1. Browse the application at http://localhost:8080/
 
