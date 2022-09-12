@@ -73,7 +73,7 @@ pipeline {
         }
         stage('exercise - qa') {
             steps {
-                timeout(20) {
+                timeout(5) {
                     sh """
                     FQDN=\$(terraform output fqdn)
                     BASEURL=\$FQDN npx playwright test
@@ -109,8 +109,12 @@ pipeline {
         }
         stage('exercise - dev') {
             steps {
+                waitUntil {
+                    def r = sh returnStatus: true, script: "FQDN=\$(terraform output fqdn); wget --retry-connrefused --tries=120 --waitretry=1 -q \$FQDN -O /dev/null"
+                    return (r == 0);
+                }
                 catchError(buildResult: 'SUCCESS', stageResult: 'ABORTED') {
-                    timeout(20) {
+                    timeout(5) {
                         sh """
                         FQDN=\$(terraform output fqdn)
                         BASEURL=\$FQDN npx playwright test
@@ -143,8 +147,12 @@ pipeline {
         }
         stage('exercise - prod') {
             steps {
+                waitUntil {
+                    def r = sh returnStatus: true, script: "FQDN=\$(terraform output fqdn); wget --retry-connrefused --tries=120 --waitretry=1 -q \$FQDN -O /dev/null"
+                    return (r == 0);
+                }
                 catchError(buildResult: 'SUCCESS', stageResult: 'ABORTED') {
-                    timeout(20) {
+                    timeout(5) {
                         sh """
                         FQDN=\$(terraform output fqdn)
                         BASEURL=\$FQDN npx playwright test e2e/attack.spec.ts
