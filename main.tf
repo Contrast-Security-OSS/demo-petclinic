@@ -21,7 +21,7 @@ resource "azurerm_container_group" "app" {
   resource_group_name = azurerm_resource_group.personal.name
   ip_address_type     = "Public"
   dns_name_label      = "${replace(var.appname, "/[^-0-9a-zA-Z]/", "-")}-${var.initials}"
-  os_type             = "linux"
+  os_type             = "Linux"
 
   container {
     name   = "web"
