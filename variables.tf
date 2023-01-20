@@ -20,7 +20,7 @@ variable "servername" {
 
 variable "environment" {
   description = "The Contrast environment for the app. Valid values: development, qa or production"
-  default     = "development"
+  default     = ""
 }
 
 variable "session_metadata" {
@@ -30,7 +30,7 @@ variable "session_metadata" {
 
 variable "python_binary" {
   description = "Path to local Python binary"
-  default     = "python"
+  default     = "python3"
 }
 
 variable "apptags" {

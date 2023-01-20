@@ -6,5 +6,15 @@ contrast_security.yaml
 .terraform.tfstate.lock.info
 node_modules
 .idea
+.github
 package-lock.json
 terraform.tfvars
+/test-results/
+/playwright-report/
+/playwright/.cache/
+/test-results/
+/playwright-report/
+/playwright/.cache/
+/target
+.DS_Store
+run_local*.sh

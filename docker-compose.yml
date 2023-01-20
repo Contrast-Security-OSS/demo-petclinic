@@ -1,0 +1,9 @@
+version: '3'
+
+services:
+  web:
+    image: spring-petclinic:1.5.1
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./contrast_security.yaml:/etc/contrast/java/contrast_security.yaml
