@@ -19,7 +19,7 @@ resource "azurerm_container_group" "app" {
   name                = "${var.appname}-${var.initials}"
   location            = azurerm_resource_group.personal.location
   resource_group_name = azurerm_resource_group.personal.name
-  ip_address_type     = "public"
+  ip_address_type     = "Public"
   dns_name_label      = "${replace(var.appname, "/[^-0-9a-zA-Z]/", "-")}-${var.initials}"
   os_type             = "linux"
 
