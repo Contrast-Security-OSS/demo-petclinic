@@ -2,7 +2,6 @@ pipeline {
     agent any
     tools {
         terraform 'terraform'
-        nodejs 'node-lts'
     }
 
     stages {
@@ -16,16 +15,13 @@ pipeline {
                 }
                 sh '''
                 terraform init -upgrade
-                npm init playwright@latest -- --quiet --browser=chromium
+                npm link @playwright/test
                 '''
             }
         }
         stage('provision') {
             steps {
                 script {
-                    env.GIT_SHORT_COMMIT = checkout(scm).GIT_COMMIT.take(7)
-                    env.GIT_BRANCH = checkout(scm).GIT_BRANCH
-
                     withCredentials([azureServicePrincipal('ContrastAzureSponsored')]) {
                         try {
                             sh """
