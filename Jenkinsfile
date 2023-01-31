@@ -50,7 +50,7 @@ pipeline {
           steps {
               script {
                   waitUntil {
-                      def r = sh returnStatus: true, script: "FQDN=\$(terraform output fqdn); wget --retry-connrefused --tries=300 --waitretry=1 -q \$FQDN -O /dev/null"
+                      def r = sh returnStatus: true, script: "FQDN=\$(terraform output --raw fqdn); wget --retry-connrefused --tries=300 --waitretry=1 -q \$FQDN -O /dev/null"
                       return (r == 0);
                   }
               }
@@ -96,7 +96,7 @@ pipeline {
             steps {
                 script {
                     waitUntil {
-                        def r = sh returnStatus: true, script: "FQDN=\$(terraform output fqdn); wget --retry-connrefused --tries=300 --waitretry=1 -q \$FQDN -O /dev/null"
+                        def r = sh returnStatus: true, script: "FQDN=\$(terraform output --raw fqdn); wget --retry-connrefused --tries=300 --waitretry=1 -q \$FQDN -O /dev/null"
                         return (r == 0);
                     }
                     catchError(buildResult: 'SUCCESS', stageResult: 'ABORTED') {
