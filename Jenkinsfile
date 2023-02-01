@@ -1,43 +1,28 @@
-env.terraform_version = '0.12.3'
-
 pipeline {
     agent any
+    tools {
+        terraform 'terraform'
+    }
 
     stages {
         stage('dependencies') {
             steps {
-                sh """
-                FILE=/usr/bin/terraform
-                if [ -f "\$FILE" ]; then
-                    echo "\$FILE exists, skipping download"
-                else
-                    echo "\$FILE does not exist"
-                    cd /tmp
-                    curl -o terraform.zip https://releases.hashicorp.com/terraform/'$terraform_version'/terraform_'$terraform_version'_linux_amd64.zip
-                    unzip -o terraform.zip
-                    sudo mv terraform /usr/bin
-                    rm -rf terraform.zip
-                fi
-                """
                 script {
                     withCredentials([file(credentialsId: env.contrast_yaml, variable: 'path')]) {
                         def contents = readFile(env.path)
                         writeFile file: 'contrast_security.yaml', text: "$contents"
                     }
                 }
-                sh """
-                terraform init
-                npm install @playwright/test
-                npm init playwright@latest -- --quiet --browser=chromium
-                """
+                sh '''
+                terraform init -upgrade
+                npm i @playwright/test --no-bin-links
+                npx playwright install --with-deps chromium
+                '''
             }
         }
         stage('provision') {
             steps {
                 script {
-                    env.GIT_SHORT_COMMIT = checkout(scm).GIT_COMMIT.take(7)
-                    env.GIT_BRANCH = checkout(scm).GIT_BRANCH
-
                     withCredentials([azureServicePrincipal('ContrastAzureSponsored')]) {
                         try {
                             sh """
@@ -65,7 +50,7 @@ pipeline {
           steps {
               script {
                   waitUntil {
-                      def r = sh returnStatus: true, script: "FQDN=\$(terraform output fqdn); wget --retry-connrefused --tries=300 --waitretry=1 -q \$FQDN -O /dev/null"
+                      def r = sh returnStatus: true, script: "FQDN=\$(terraform output --raw fqdn); wget --retry-connrefused --tries=300 --waitretry=1 -q \$FQDN -O /dev/null"
                       return (r == 0);
                   }
               }
@@ -75,7 +60,7 @@ pipeline {
             steps {
                 timeout(5) {
                     sh """
-                    FQDN=\$(terraform output fqdn)
+                    FQDN=\$(terraform output --raw fqdn)
                     BASEURL=\$FQDN npx playwright test e2e/assess/*.ts
                     """
                 }
@@ -111,13 +96,13 @@ pipeline {
             steps {
                 script {
                     waitUntil {
-                        def r = sh returnStatus: true, script: "FQDN=\$(terraform output fqdn); wget --retry-connrefused --tries=300 --waitretry=1 -q \$FQDN -O /dev/null"
+                        def r = sh returnStatus: true, script: "FQDN=\$(terraform output --raw fqdn); wget --retry-connrefused --tries=300 --waitretry=1 -q \$FQDN -O /dev/null"
                         return (r == 0);
                     }
                     catchError(buildResult: 'SUCCESS', stageResult: 'ABORTED') {
                         timeout(5) {
                             sh """
-                            FQDN=\$(terraform output fqdn)
+                            FQDN=\$(terraform output --raw fqdn)
                             BASEURL=\$FQDN npx playwright test e2e/assess/*.ts
                             """
                         }
@@ -168,11 +153,14 @@ pipeline {
         stage('destroy') {
             steps {
                 withCredentials([azureServicePrincipal('ContrastAzureSponsored')]) {
-                    sh """export ARM_CLIENT_ID=$AZURE_CLIENT_ID
-                    export ARM_CLIENT_SECRET=$AZURE_CLIENT_SECRET
-                    export ARM_SUBSCRIPTION_ID=$AZURE_SUBSCRIPTION_ID
-                    export ARM_TENANT_ID=$AZURE_TENANT_ID
-                    terraform destroy -auto-approve"""
+                    sh """
+                    export ARM_CLIENT_ID=\$AZURE_CLIENT_ID
+                    export ARM_CLIENT_SECRET=\$AZURE_CLIENT_SECRET
+                    export ARM_SUBSCRIPTION_ID=\$AZURE_SUBSCRIPTION_ID
+                    export ARM_TENANT_ID=\$AZURE_TENANT_ID
+                    terraform destroy --auto-approve \
+                        -var 'location=$location'
+                    """
                 }
             }
         }
