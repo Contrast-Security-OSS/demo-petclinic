@@ -157,7 +157,7 @@ pipeline {
                     catchError(buildResult: 'SUCCESS', stageResult: 'ABORTED') {
                         timeout(5) {
                             sh """
-                            FQDN=\$(terraform output fqdn)
+                            FQDN=\$(terraform output --raw fqdn)
                             BASEURL=\$FQDN npx playwright test e2e/protect/*.ts
                             """
                         }
