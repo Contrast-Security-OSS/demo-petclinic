@@ -47,14 +47,16 @@ pipeline {
             }
         }
         stage('sleeping') {
-          steps {
-              script {
-                  waitUntil {
-                      def r = sh returnStatus: true, script: "FQDN=\$(terraform output --raw fqdn); wget --retry-connrefused --tries=300 --waitretry=1 -q \$FQDN -O /dev/null"
-                      return (r == 0);
-                  }
-              }
-          }
+            steps {
+                timeout(5) {
+                    script {
+                        waitUntil {
+                            def r = sh returnStatus: true, script: "FQDN=\$(terraform output --raw fqdn); wget --retry-connrefused --tries=300 --waitretry=1 \$FQDN -O /dev/null"
+                            return (r == 0);
+                        }
+                    }
+                }
+            }
         }
         stage('exercise - qa') {
             steps {
@@ -94,17 +96,19 @@ pipeline {
         }
         stage('exercise - dev') {
             steps {
-                script {
-                    waitUntil {
-                        def r = sh returnStatus: true, script: "FQDN=\$(terraform output --raw fqdn); wget --retry-connrefused --tries=300 --waitretry=1 -q \$FQDN -O /dev/null"
-                        return (r == 0);
-                    }
-                    catchError(buildResult: 'SUCCESS', stageResult: 'ABORTED') {
-                        timeout(5) {
-                            sh """
-                            FQDN=\$(terraform output --raw fqdn)
-                            BASEURL=\$FQDN npx playwright test e2e/assess/*.ts
-                            """
+                timeout(5) {
+                    script {
+                        waitUntil {
+                            def r = sh returnStatus: true, script: "FQDN=\$(terraform output --raw fqdn); wget --retry-connrefused --tries=300 --waitretry=1 \$FQDN -O /dev/null"
+                            return (r == 0);
+                        }
+                        catchError(buildResult: 'SUCCESS', stageResult: 'ABORTED') {
+                            timeout(5) {
+                                sh """
+                                FQDN=\$(terraform output --raw fqdn)
+                                BASEURL=\$FQDN npx playwright test e2e/assess/*.ts
+                                """
+                            }
                         }
                     }
                 }
@@ -112,21 +116,23 @@ pipeline {
         }
         stage('provision - prod') {
             steps {
-                script {
-                    withCredentials([azureServicePrincipal('ContrastAzureSponsored')]) {
-                        try {
-                            sh """
-                            export ARM_CLIENT_ID=$AZURE_CLIENT_ID
-                            export ARM_CLIENT_SECRET=$AZURE_CLIENT_SECRET
-                            export ARM_SUBSCRIPTION_ID=$AZURE_SUBSCRIPTION_ID
-                            export ARM_TENANT_ID=$AZURE_TENANT_ID
-                            terraform apply -auto-approve -var 'location=$location' -var 'initials=$initials' -var 'environment=production' -var 'servername=Prod-01'
-                            """
-                        } catch (Exception e) {
-                            echo "Terraform refresh failed, deleting state"
-                            sh "rm -rf terraform.tfstate"
-                            currentBuild.result = "FAILURE"
-                            error("Aborting the build.")
+                timeout(5) {
+                    script {
+                        withCredentials([azureServicePrincipal('ContrastAzureSponsored')]) {
+                            try {
+                                sh """
+                                export ARM_CLIENT_ID=$AZURE_CLIENT_ID
+                                export ARM_CLIENT_SECRET=$AZURE_CLIENT_SECRET
+                                export ARM_SUBSCRIPTION_ID=$AZURE_SUBSCRIPTION_ID
+                                export ARM_TENANT_ID=$AZURE_TENANT_ID
+                                terraform apply -auto-approve -var 'location=$location' -var 'initials=$initials' -var 'environment=production' -var 'servername=Prod-01'
+                                """
+                            } catch (Exception e) {
+                                echo "Terraform refresh failed, deleting state"
+                                sh "rm -rf terraform.tfstate"
+                                currentBuild.result = "FAILURE"
+                                error("Aborting the build.")
+                            }
                         }
                     }
                 }
@@ -134,17 +140,19 @@ pipeline {
         }
         stage('exercise - prod') {
             steps {
-                script {
-                    waitUntil {
-                        def r = sh returnStatus: true, script: "FQDN=\$(terraform output --raw fqdn); wget --retry-connrefused --tries=300 --waitretry=1 -q \$FQDN -O /dev/null"
-                        return (r == 0);
-                    }
-                    catchError(buildResult: 'SUCCESS', stageResult: 'ABORTED') {
-                        timeout(5) {
-                            sh """
-                            FQDN=\$(terraform output --raw fqdn)
-                            BASEURL=\$FQDN npx playwright test e2e/protect/*.ts
-                            """
+                timeout(5) {
+                    script {
+                        waitUntil {
+                            def r = sh returnStatus: true, script: "FQDN=\$(terraform output --raw fqdn); wget --retry-connrefused --tries=300 --waitretry=1 \$FQDN -O /dev/null"
+                            return (r == 0);
+                        }
+                        catchError(buildResult: 'SUCCESS', stageResult: 'ABORTED') {
+                            timeout(5) {
+                                sh """
+                                FQDN=\$(terraform output --raw fqdn)
+                                BASEURL=\$FQDN npx playwright test e2e/protect/*.ts
+                                """
+                            }
                         }
                     }
                 }
