@@ -15,6 +15,7 @@ pipeline {
                 }
                 sh '''
                 terraform init -upgrade
+                npm uninstall @playwright/test
                 npm i @playwright/test --no-bin-links
                 npx playwright install --with-deps chromium
                 '''
