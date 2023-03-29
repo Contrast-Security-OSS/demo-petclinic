@@ -15,8 +15,5 @@
   "bugs": {
     "url": "https://github.com/Contrast-Security-OSS/demo-petclinic/issues"
   },
-  "homepage": "https://github.com/Contrast-Security-OSS/demo-petclinic#readme",
-  "devDependencies": {
-    "@playwright/test": "^1.32.1"
-  }
+  "homepage": "https://github.com/Contrast-Security-OSS/demo-petclinic#readme"
 }
