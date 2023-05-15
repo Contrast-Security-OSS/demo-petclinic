@@ -16,7 +16,7 @@ jobs:
     - name: Set up Google Cloud SDK
       uses: google-github-actions/setup-gcloud@v0.5.0
       with:
-        project_id: your-project-id
+        project_id: arc-mark-volfson-sandbox
         service_account_key: ${{ secrets.GCP_SA_KEY }}
         export_default_credentials: true
 
