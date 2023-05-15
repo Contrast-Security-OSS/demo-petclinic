@@ -26,8 +26,8 @@ jobs:
         docker buildx build --platform=linux/amd64 --tag="us-central1-docker.pkg.dev/arc-mark-volfson-sandbox/petclinic-demo/petclinic:v1" . --no-cache
         
     - name: Configure Docker to use GCP Artifact Registry
-        run: |
-          gcloud auth configure-docker -q
+      run: |
+        gcloud auth configure-docker -q
       
     - name: Push Docker image to GCP Artifact Registry
       run: |
