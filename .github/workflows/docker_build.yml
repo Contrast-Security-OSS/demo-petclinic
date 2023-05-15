@@ -16,7 +16,7 @@ jobs:
     - name: Build Docker image
       run: |
         docker buildx create --use
-        docker buildx build --platform linux/amd64 --tag us-central1-docker.pkg.dev/arc-mark-volfson-sandbox/petclinic-demo/petclinic:v1 --file .
+        docker buildx build --platform=linux/amd64 -t us-central1-docker.pkg.dev/arc-mark-volfson-sandbox/petclinic-demo/petclinic:v1 .
     
     - name: Set up Google Cloud SDK
       uses: google-github-actions/setup-gcloud@v0.5.0
