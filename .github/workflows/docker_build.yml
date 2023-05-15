@@ -1,0 +1,34 @@
+name: Build Docker Image
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Build Docker image
+      run: |
+        docker buildx create --use
+        docker buildx build --platform linux/amd64 --tag us-central1-docker.pkg.dev/arc-mark-volfson-sandbox/petclinic-demo/petclinic:v1 --file .
+    
+    - name: Set up Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@v0.5.0
+      with:
+        project_id: your-project-id
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+        export_default_credentials: true
+    
+    - name: Configure Docker to use GCP Artifact Registry
+      run: |
+        gcloud auth configure-docker -q
+    
+    - name: Push Docker image to GCP Artifact Registry
+      run: |
+        docker push us-central1-docker.pkg.dev/arc-mark-volfson-sandbox/petclinic-demo/petclinic:v1
