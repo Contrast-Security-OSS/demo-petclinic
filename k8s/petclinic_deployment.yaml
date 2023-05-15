@@ -14,13 +14,27 @@ spec:
     spec:
       containers:
       - name: petclinic
-        image: contrastsecuritydemo/spring-petclinic:k8s
+        image: us-central1-docker.pkg.dev/arc-mark-volfson-sandbox/petclinic-demo/petclinic:v1
+        #image: spring-petclinic:k8s
         ports: 
           - containerPort: 8080
+        # env:
+        #   - name: CONTRAST__APPLICATION__NAME
+        #     value: "petclinic-k8s"
+        #   - name: CONTRAST__SERVER__NAME
+        #     value: "EKS-Core-Pod"
+        #   - name: CONTRAST__SERVER__ENVIRONMENT
+        #     value: "QA"
+        #   - name: CONTRAST_CONFIG_PATH
+        #     value: "/etc/contrast/contrast_security.yaml"
+        #   - name: AGENT__LOGGER__STDOUT
+        #     value: "true"
+        #   - name: AGENT__LOGGER__LEVEL
+        #     value: "INFO"
         envFrom:
           - configMapRef:
-              name: contrast-config  
-        # Volume Mount for contrast_security.yaml  
+              name: contrast-config
+        #Volume Mount for contrast_security.yaml  
         volumeMounts:
         - name: contrast-security
           readOnly: false
@@ -37,5 +51,3 @@ spec:
       - name: contrast-security
         secret:
           secretName: contrast-security
-
-
