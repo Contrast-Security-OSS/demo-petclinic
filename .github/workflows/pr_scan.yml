@@ -28,7 +28,20 @@ jobs:
           report_contents=$(cat snyk_report.txt)
           echo "::set-output name=report-contents::$report_contents"
 
+      - name: Check Medium Severity Issues
+        id: check-medium-issues
+        run: |
+          number=$(grep -o 'Medium Severity Issues: [0-9]\+' file.txt | grep -o '[0-9]\+')
+          echo "::set-output name=number::$number"
+      
+      - name: Upload Snyk scan report
+        uses: actions/upload-artifact@v2
+        with:
+          name: snyk-report
+          path: snyk_report.json
+
       - name: Open Azure DevOps Ticket
+        if: steps.check-medium-issues.outputs.number == '3'
         uses: Azure/cli@v1.0.7
         with:
           azcliversion: 'latest'
@@ -39,9 +52,5 @@ jobs:
             description=$(cat snyk_report.txt)
             az devops configure --defaults organization=https://dev.azure.com/markvolfson/ project=appsec-demo
             az boards work-item create --title "PR Failed - Snyk Results" --type "Task" --description "$description"
-            
-      - name: Upload Snyk scan report
-        uses: actions/upload-artifact@v2
-        with:
-          name: snyk-report
-          path: snyk_report.json
+            failure("Code contains security vulnerabilities")
+      
