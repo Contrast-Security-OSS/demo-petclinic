@@ -29,7 +29,7 @@ jobs:
           echo "::set-output name=medium-vulnerabilities::$(cat medium_vulnerabilities.json)"
 
       - name: Create Azure DevOps Task if Medium Vulnerabilities Exist
-        if: steps.extract-vulnerabilities.outputs.medium-vulnerabilities != "[]"
+        if: steps.extract-vulnerabilities.outputs.medium-vulnerabilities != '[]'
         run: |
           # Extracting information from medium_vulnerabilities.json
           vulnerabilities=$(cat medium_vulnerabilities.json)
