@@ -28,20 +28,16 @@ jobs:
           report_contents=$(cat snyk_report.txt)
           echo "::set-output name=report-contents::$report_contents"
 
-      - name: Create Azure DevOps Task with Snyk IaC report description
-        run: |
-          # Extracting information from report-contents output
-          summary="PR Failed - Snyk Scan Results"
-          description=$(echo "${{ steps.read-snyk-report.outputs.report-contents }}")
-          azureDevOpsUrl="POST https://dev.azure.com/markvolfson/appsec-demo/_apis/wit/workitems/${type}?api-version=7.0"
-
-          # Create Azure DevOps Task payload
-          payload="{\"op\": \"add\", \"path\": \"/fields/System.Title\", \"value\": \"$summary\"}, {\"op\": \"add\", \"path\": \"/fields/System.Description\", \"value\": \"$description\"}"
-
-          # Create Azure DevOps Task
-          response=$(curl -s -u mark.volfson@arctiq.ca[:rccfehpdckwpqn3hh23aphjx6mh4shjyhquutime457ekbmj7bva] -H "Content-Type: application/json-patch+json" -d "$payload" "$azureDevOpsUrl")
-          echo "Azure DevOps Task created with ID: $(echo $response | jq -r '.id')"
-
+      - name: Open Azure DevOps Ticket
+        uses: microsoft/azure-devops-cli-action@v2
+        with:
+          azcliversion: 'latest'
+          inlineScript: |
+            echo  "7ky3r7jr6se76sxo5dknhudcueucsf7ffsllqvhezptjyynn6hna" | az devops login --organization https://dev.azure.com/markvolfson/
+            az extension add --name azure-devops
+            az devops configure --defaults organization=markvolfson project=appsec-demo
+            az boards work-item create --title "PR Failed - Snyk Results" --type "Task" --description "Testing"
+            
       - name: Upload Snyk scan report
         uses: actions/upload-artifact@v2
         with:
