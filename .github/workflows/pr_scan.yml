@@ -16,7 +16,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --severity-threshold=high --project-id=491d9894-c158-4a71-8a53-7b1101c1f535
+          args: --severity-threshold=high --project-id=491d9894-c158-4a71-8a53-7b1101c1f535 --all-projects --json
 
       - name: Check Snyk scan results
         run: |
