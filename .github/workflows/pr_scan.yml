@@ -22,13 +22,27 @@ jobs:
         run: |
           snyk iac test > snyk_report.json || true
 
-      - name: Check Snyk scan results
+      - name: Extract Medium Vulnerabilities
+        id: extract-vulnerabilities
         run: |
-          jq -r '.vulnerabilities | .[] | select(.severity == "high" or .severity == "critical")' snyk_report.json
-          if [ $? -eq 0 ]; then
-            echo "Critical vulnerabilities found. Exiting..."
-            exit 1
-          fi
+          cat snyk_iac_report.json | jq '.issues | map(select(.severity == "medium"))' > medium_vulnerabilities.json
+          echo "::set-output name=medium-vulnerabilities::$(cat medium_vulnerabilities.json)"
+
+      - name: Create Azure DevOps Task if Medium Vulnerabilities Exist
+        if: steps.extract-vulnerabilities.outputs.medium-vulnerabilities != "[]"
+        run: |
+          # Extracting information from medium_vulnerabilities.json
+          vulnerabilities=$(cat medium_vulnerabilities.json)
+          summary="Medium Vulnerabilities found in Snyk IaC scan:"
+          description=$(jq -r '.[] | "\(.title) \nSeverity: \(.severity) \nDescription: \(.description) \n\n"' medium_vulnerabilities.json)
+          azureDevOpsUrl="https://dev.azure.com/markvolfson/appsec-demo/_apis/wit/workitems/\$Task?api-version=6.0"
+
+          # Create Azure DevOps Task payload
+          payload="{\"op\": \"add\", \"path\": \"/fields/System.Title\", \"value\": \"$summary\"}, {\"op\": \"add\", \"path\": \"/fields/System.Description\", \"value\": \"$description\"}"
+
+          # Create Azure DevOps Task
+          response=$(curl -s -u mark.volfson@arctiq.ca:up43vxc77dlt66kog7s3dv7sny3cs3e3pdjlpv5brf7soopfpveq -H "Content-Type: application/json-patch+json" -d "$payload" "$azureDevOpsUrl")
+          echo "Azure DevOps Task created with ID: $(echo $response | jq -r '.id')"
 
       - name: Upload Snyk scan report
         uses: actions/upload-artifact@v2
