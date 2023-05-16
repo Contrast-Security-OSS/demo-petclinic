@@ -1,9 +1,9 @@
 name: Snyk Scan
 
 on:
-  push:
+  pull_request:
     branches:
-      - main
+      - master
 
 jobs:
   snyk-scan:
