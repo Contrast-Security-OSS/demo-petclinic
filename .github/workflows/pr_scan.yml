@@ -29,7 +29,7 @@ jobs:
           echo "::set-output name=report-contents::$report_contents"
 
       - name: Open Azure DevOps Ticket
-        uses: microsoft/azure-devops-cli-action@v2
+        uses: Azure/cli@v1.0.7
         with:
           azcliversion: 'latest'
           inlineScript: |
