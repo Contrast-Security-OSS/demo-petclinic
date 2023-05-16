@@ -29,7 +29,6 @@ jobs:
           echo "::set-output name=report-contents::$report_contents"
 
       - name: Create Azure DevOps Task with Snyk IaC report description
-        if: steps.read-snyk-report.outputs.report-contents != ""
         run: |
           # Extracting information from report-contents output
           summary="PR Failed - Snyk Scan Results"
