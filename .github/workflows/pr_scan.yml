@@ -15,7 +15,7 @@ jobs:
         run: npm install -g snyk
 
       - name: Authenticate with Snyk
-        run: snyk auth ${{ secrets.snyk_token }}
+        run: snyk auth ${{ secrets.SNYK_TOKEN }}
 
       - name: Run Snyk scan
         run: snyk test --all-projects --all-sub-projects --json --all-issues --fail-on=high, critical  > snyk_report.json
