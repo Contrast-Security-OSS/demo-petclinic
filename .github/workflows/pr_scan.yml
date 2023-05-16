@@ -11,12 +11,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/node@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --severity-threshold=high --project-id=491d9894-c158-4a71-8a53-7b1101c1f535 --all-projects --json
+      - name: Install Snyk CLI
+        run: npm install -g snyk
+
+      - name: Authenticate with Snyk
+        run: snyk auth ${{ env.SNYK_TOKEN }}
+
+      - name: Run Snyk scan
+        id: snyk-scan
+        run: |
+          snyk iac test > snyk_report.json
 
       - name: Check Snyk scan results
         run: |
