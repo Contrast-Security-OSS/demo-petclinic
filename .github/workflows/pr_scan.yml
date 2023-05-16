@@ -20,7 +20,7 @@ jobs:
       - name: Run Snyk scan
         id: snyk-scan
         run: |
-          snyk iac test > snyk_report.json
+          snyk iac test > snyk_report.json || true
 
       - name: Check Snyk scan results
         run: |
