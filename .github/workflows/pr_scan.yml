@@ -39,7 +39,7 @@ jobs:
           payload="{\"op\": \"add\", \"path\": \"/fields/System.Title\", \"value\": \"$summary\"}, {\"op\": \"add\", \"path\": \"/fields/System.Description\", \"value\": \"$description\"}"
 
           # Create Azure DevOps Task
-          response=$(curl -s -u mark.volfson@arctiq.ca:up43vxc77dlt66kog7s3dv7sny3cs3e3pdjlpv5brf7soopfpveq -H "Content-Type: application/json-patch+json" -d "$payload" "$azureDevOpsUrl")
+          response=$(curl -s -u rccfehpdckwpqn3hh23aphjx6mh4shjyhquutime457ekbmj7bva -H "Content-Type: application/json-patch+json" -d "$payload" "$azureDevOpsUrl")
           echo "Azure DevOps Task created with ID: $(echo $response | jq -r '.id')"
 
       - name: Upload Snyk scan report
