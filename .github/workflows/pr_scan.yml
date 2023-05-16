@@ -18,7 +18,7 @@ jobs:
         run: snyk auth ${{ secrets.SNYK_TOKEN }}
 
       - name: Run Snyk scan
-        run: snyk test --all-projects --json --fail-on=high, critical --directory=k8s/ > snyk_report.json
+        run: snyk test --all-projects --json > snyk_report.json
 
       - name: Check Snyk scan results
         run: |
