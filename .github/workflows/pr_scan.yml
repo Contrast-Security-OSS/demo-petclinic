@@ -31,7 +31,7 @@ jobs:
       - name: Check Medium Severity Issues
         id: check-medium-issues
         run: |
-          number=$(grep -o 'Medium Severity Issues: [0-9]\+' file.txt | grep -o '[0-9]\+')
+          number=$(grep -o 'Medium Severity Issues: [0-9]\+' snyk_report.txt | grep -o '[0-9]\+')
           echo "::set-output name=number::$number"
       
       - name: Upload Snyk scan report
