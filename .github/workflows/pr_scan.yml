@@ -1,7 +1,9 @@
 name: Snyk Scan
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   snyk-scan:
@@ -52,5 +54,8 @@ jobs:
             description=$(cat snyk_report.txt)
             az devops configure --defaults organization=https://dev.azure.com/markvolfson/ project=appsec-demo
             az boards work-item create --title "PR Failed - Snyk Results" --type "Task" --description "$description"
-            failure("Code contains security vulnerabilities")
-      
+        
+      - name: Quality Gate
+        id: quality-gate
+        run: |
+          failure("Code contains security vulnerabilities")
