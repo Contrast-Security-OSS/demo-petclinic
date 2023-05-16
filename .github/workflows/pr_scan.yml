@@ -35,7 +35,7 @@ jobs:
           inlineScript: |
             az config set extension.use_dynamic_install=yes_without_prompt
             az extension add --name azure-devops
-            echo "i4m4t5lx7nxjlplhagkhtd67thpynustxuuahbezzzhvu5567yjq" | az devops login --organization https://dev.azure.com/markvolfson/
+            echo ${{ secrets.PAT_AZURE }} | az devops login --organization https://dev.azure.com/markvolfson/
             az devops configure --defaults organization=markvolfson project=appsec-demo
             az boards work-item create --title "PR Failed - Snyk Results" --type "Task" --description "Testing"
             
