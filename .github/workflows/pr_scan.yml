@@ -25,7 +25,7 @@ jobs:
       - name: Extract Medium Vulnerabilities
         id: extract-vulnerabilities
         run: |
-          cat snyk_iac_report.json | jq '.issues | map(select(.severity == "medium"))' > medium_vulnerabilities.json
+          cat snyk_report.json | jq '.issues | map(select(.severity == "medium"))' > medium_vulnerabilities.json
           echo "::set-output name=medium-vulnerabilities::$(cat medium_vulnerabilities.json)"
 
       - name: Create Azure DevOps Task if Medium Vulnerabilities Exist
