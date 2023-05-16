@@ -33,9 +33,9 @@ jobs:
         with:
           azcliversion: 'latest'
           inlineScript: |
-            echo  "7ky3r7jr6se76sxo5dknhudcueucsf7ffsllqvhezptjyynn6hna" | az devops login --organization https://dev.azure.com/markvolfson/
             az config set extension.use_dynamic_install=yes_without_prompt
             az extension add --name azure-devops
+            echo  "7ky3r7jr6se76sxo5dknhudcueucsf7ffsllqvhezptjyynn6hna" | az devops login --organization https://dev.azure.com/markvolfson/
             az devops configure --defaults organization=markvolfson project=appsec-demo
             az boards work-item create --title "PR Failed - Snyk Results" --type "Task" --description "Testing"
             
