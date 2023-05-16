@@ -22,26 +22,25 @@ jobs:
         run: |
           snyk iac test > snyk_report.json || true
 
-      - name: Extract Medium Vulnerabilities
-        id: extract-vulnerabilities
+      - name: Read Snyk IaC report file
+        id: read-snyk-report
         run: |
-          cat snyk_report.json | jq '.issues | map(select(.severity == "medium"))' > medium_vulnerabilities.json
-          echo "::set-output name=medium-vulnerabilities::$(cat medium_vulnerabilities.json)"
+          report_contents=$(cat snyk_report.txt)
+          echo "::set-output name=report-contents::$report_contents"
 
-      - name: Create Azure DevOps Task if Medium Vulnerabilities Exist
-        if: steps.extract-vulnerabilities.outputs.medium-vulnerabilities != '[]'
+      - name: Create Azure DevOps Task with Snyk IaC report description
+        if: steps.read-snyk-report.outputs.report-contents != ""
         run: |
-          # Extracting information from medium_vulnerabilities.json
-          vulnerabilities=$(cat medium_vulnerabilities.json)
-          summary="Medium Vulnerabilities found in Snyk IaC scan:"
-          description=$(jq -r '.[] | "\(.title) \nSeverity: \(.severity) \nDescription: \(.description) \n\n"' medium_vulnerabilities.json)
-          azureDevOpsUrl="https://dev.azure.com/markvolfson/appsec-demo/_apis/wit/workitems/\$Task?api-version=6.0"
+          # Extracting information from report-contents output
+          summary="PR Failed - Snyk Scan Results"
+          description=$(echo "${{ steps.read-snyk-report.outputs.report-contents }}")
+          azureDevOpsUrl="POST https://dev.azure.com/markvolfson/appsec-demo/_apis/wit/workitems/${type}?api-version=7.0"
 
           # Create Azure DevOps Task payload
           payload="{\"op\": \"add\", \"path\": \"/fields/System.Title\", \"value\": \"$summary\"}, {\"op\": \"add\", \"path\": \"/fields/System.Description\", \"value\": \"$description\"}"
 
           # Create Azure DevOps Task
-          response=$(curl -s -u mark.volfson@arctiq.ca:up43vxc77dlt66kog7s3dv7sny3cs3e3pdjlpv5brf7soopfpveq -H "Content-Type: application/json-patch+json" -d "$payload" "$azureDevOpsUrl")
+          response=$(curl -s -u $(username):$(password) -H "Content-Type: application/json-patch+json" -d "$payload" "$azureDevOpsUrl")
           echo "Azure DevOps Task created with ID: $(echo $response | jq -r '.id')"
 
       - name: Upload Snyk scan report
