@@ -11,14 +11,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install Snyk CLI
-        run: npm install -g snyk
-
-      - name: Authenticate with Snyk
-        run: snyk auth ${{ secrets.SNYK_TOKEN }}
-
-      - name: Run Snyk scan
-        run: snyk test --all-projects --json --all-issues --project-id=491d9894-c158-4a71-8a53-7b1101c1f535 > snyk_report.json  || echo "::set-env name=SCAN_FAILED::true"
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/nodemaster
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high --project-id=491d9894-c158-4a71-8a53-7b1101c1f535
 
       - name: Check Snyk scan results
         run: |
