@@ -50,7 +50,7 @@ jobs:
         run: npm install -g azure-cli
 
       - name: Open Azure DevOps Ticket
-        if: steps.check-medium-issues.outputs.number == '3'
+        if: steps.check-medium-issues.outputs.number == '4'
         run: |
           az config set extension.use_dynamic_install=yes_without_prompt
           az extension add --name azure-devops
@@ -61,7 +61,7 @@ jobs:
       
       - name: Quality Gate
         id: quality-gate
-        if: steps.check-medium-issues.outputs.number == '3'
+        if: steps.check-medium-issues.outputs.number == '4'
         run: |
           failure("Code contains security vulnerabilities")
   deploy:
