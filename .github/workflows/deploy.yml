@@ -83,5 +83,5 @@ jobs:
 
       - name: Apply Kubernetes configuration
         run: |
-          kubectl config use-context gke_arc-mark-volfson-sandbox_us-central1_appsec-demo
+          gcloud container clusters get-credentials appsec-demo --region us-central1
           kubectl apply -f k8s/petclinic_deployment.yaml
