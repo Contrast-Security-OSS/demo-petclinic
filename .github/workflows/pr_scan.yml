@@ -40,7 +40,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: snyk-report
-          path: snyk_report.json
+          path: snyk_report.txt
 
       - name: Open Azure DevOps Ticket
         if: steps.check-medium-issues.outputs.number == '3'
