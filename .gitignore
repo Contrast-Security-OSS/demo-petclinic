@@ -6,7 +6,6 @@ contrast_security.yaml
 .terraform.tfstate.lock.info
 node_modules
 .idea
-.github
 package-lock.json
 terraform.tfvars
 /test-results/
