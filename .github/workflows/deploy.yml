@@ -1,0 +1,88 @@
+name: Deploy to GKE
+
+on:
+  push:
+    branches:
+      - master
+
+env:
+  PROJECT_ID: arc-mark-volfson-sandbox
+  CLUSTER_NAME: appsec-demo
+  GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+
+jobs:
+  snyk-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install Snyk CLI
+        run: npm install -g snyk
+
+      - name: Authenticate with Snyk
+        run: snyk auth ${{ secrets.SNYK_TOKEN }}
+
+      - name: Run Snyk scan
+        id: snyk-scan
+        run: |
+          snyk iac test > snyk_report.txt || true
+
+      - name: Read Snyk IaC report file
+        id: read-snyk-report
+        run: |
+          report_contents=$(cat snyk_report.txt)
+          echo "::set-output name=report-contents::$report_contents"
+
+      - name: Check Medium Severity Issues
+        id: check-medium-issues
+        run: |
+          number=$(grep -o 'Medium Severity Issues: [0-9]\+' snyk_report.txt | grep -o '[0-9]\+')
+          echo "::set-output name=number::$number"
+      
+      - name: Upload Snyk scan report
+        uses: actions/upload-artifact@v2
+        with:
+          name: snyk-report
+          path: snyk_report.txt
+
+      - name: Install Azure CLI
+        run: npm install -g azure-cli
+
+      - name: Open Azure DevOps Ticket
+        if: steps.check-medium-issues.outputs.number == '4'
+        run: |
+          az config set extension.use_dynamic_install=yes_without_prompt
+          az extension add --name azure-devops
+          echo ${{ secrets.PAT_AZURE }} | az devops login --organization "https://dev.azure.com/markvolfson/"
+          description=$(cat snyk_report.txt)
+          az devops configure --defaults organization=https://dev.azure.com/markvolfson/ project=appsec-demo
+          az boards work-item create --title "PR Failed - Snyk Results" --type "Task" --description "$description"
+      
+      - name: Quality Gate
+        id: quality-gate
+        if: steps.check-medium-issues.outputs.number == '4'
+        run: |
+          failure("Code contains security vulnerabilities")
+  deploy:
+    runs-on: ubuntu-latest
+    needs: snyk-scan
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0.3.0
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+          service_account_key: ${{ env.GOOGLE_APPLICATION_CREDENTIALS }}
+          export_default_credentials: true
+
+      - name: Set up Kubernetes context
+        uses: azure/setup-kubectl@v3
+
+      - name: Apply Kubernetes configuration
+        run: |
+          gcloud components install gke-gcloud-auth-plugin
+          gcloud container clusters get-credentials appsec-demo --region us-central1
+          kubectl apply -f k8s/petclinic_deployment.yaml
