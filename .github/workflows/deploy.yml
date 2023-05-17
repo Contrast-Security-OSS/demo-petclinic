@@ -83,5 +83,6 @@ jobs:
 
       - name: Apply Kubernetes configuration
         run: |
+          gcloud components install gke-gcloud-auth-plugin
           gcloud container clusters get-credentials appsec-demo --region us-central1
           kubectl apply -f k8s/petclinic_deployment.yaml
