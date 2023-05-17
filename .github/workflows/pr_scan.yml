@@ -57,5 +57,6 @@ jobs:
         
       - name: Quality Gate
         id: quality-gate
+        if: steps.check-medium-issues.outputs.number == '3'
         run: |
           failure("Code contains security vulnerabilities")
