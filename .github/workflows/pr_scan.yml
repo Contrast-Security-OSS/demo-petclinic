@@ -44,7 +44,7 @@ jobs:
 
       - name: Open Azure DevOps Ticket
         if: steps.check-medium-issues.outputs.number == '3'
-        uses: Azure/cli@v1.0.7
+        uses: azure/cli@v1.0.7
         with:
           azcliversion: 'latest'
           inlineScript: |
