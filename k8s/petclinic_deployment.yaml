@@ -33,9 +33,6 @@ spec:
           limits:
             cpu: 2.0
             memory: 4Gi
-        securityContext:
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
       # Volume from contrast-security secret
       volumes:
       - name: contrast-security
