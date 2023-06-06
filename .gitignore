@@ -1,10 +1,18 @@
-contrast.jar
+# Common gitignore for general files and IDE settings
+node_modules
+package-lock.json
+.idea/
+.vscode/
+
+
+# Ignore terraform state files
 terraform.tfstate
 terraform.tfstate.backup
 .terraform
-contrast_security.yaml
 .terraform.tfstate.lock.info
-node_modules
-.idea
-package-lock.json
 terraform.tfvars
+
+# Ignore Contrast Security agent and config files
+contrast.jar
+contrast_security.yaml
+contrast_security.prod.yaml
