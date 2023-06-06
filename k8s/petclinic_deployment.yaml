@@ -33,3 +33,9 @@ spec:
           limits:
             cpu: 2.0
             memory: 4Gi
+
+      # Volume from contrast-security secret
+      volumes:
+      - name: contrast-security
+        secret:
+          secretName: contrast-security
