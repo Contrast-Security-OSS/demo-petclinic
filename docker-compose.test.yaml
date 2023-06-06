@@ -1,0 +1,40 @@
+services: 
+
+  tests: 
+    image: playwright-testrunner
+    container_name: playwright-tests-dev
+    volumes:
+      - ./e2e:/tests/e2e/
+    environment: 
+      BASEURL: "http://petclinic-dev:8080"
+    command:  [ "npx", "playwright", "test", "assess" ]
+    ports:
+      - 9323:9323
+    networks:
+      - petclinic-network
+    depends_on: 
+      petclinic-dev:
+        condition: service_healthy
+    profiles:
+      - test-dev
+        
+  tests-prod: 
+    image: playwright-testrunner
+    container_name: playwright-tests-prod
+    volumes:
+      - ./e2e:/tests/e2e/
+    environment: 
+      BASEURL: "http://petclinic-prod:8080"
+    command:  [ "npx", "playwright", "test", "protect" ]
+    ports:
+      - 9323:9323
+    networks:
+      - petclinic-network
+    depends_on: 
+      petclinic-prod:
+        condition: service_healthy
+    profiles:
+      - test-prod
+
+networks: 
+  petclinic-network:

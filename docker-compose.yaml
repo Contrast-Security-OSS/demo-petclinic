@@ -1,0 +1,55 @@
+name: demo-petclinic
+    
+services:
+
+  # Define the base development service for local development and run the 
+  # Contrast Agent in Assess mode by setting CONTRAST__SERVER__ENVIRONMENT to 
+  # Development.
+  petclinic-dev:
+    image: petclinic:latest
+    build: 
+      context: . 
+      dockerfile: Dockerfile
+      target: contrast
+    container_name: petclinic-dev
+    environment: 
+        CONTRAST__SERVER__NAME: petclinic-dev-server
+        CONTRAST__SERVER__ENVIRONMENT: Development
+    ports: 
+      - 8080:8080
+    networks:
+      - petclinic-network
+    healthcheck:
+      test: ["CMD", "wget", "http://localhost:8080", "-O", "/dev/null"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # Extend the development service above to create a production service. 
+  # Overwrite CONTRAST__SERVER__ENVIRONMENT to Production to run the Contrast 
+  # Agent in Protect mode. 
+  petclinic-prod:
+    image: petclinic:latest
+    build: 
+      context: . 
+      dockerfile: Dockerfile
+      target: contrast
+    container_name: petclinic-prod
+    environment: 
+        CONTRAST__SERVER__NAME: petclinic-prod-server
+        CONTRAST__SERVER__ENVIRONMENT: Production
+    ports: 
+      - 8081:8080
+    networks:
+      - petclinic-network
+    healthcheck:
+      test: ["CMD", "wget", "http://localhost:8080", "-O", "/dev/null"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+networks: 
+  petclinic-network:
+    name: petclinic-network
