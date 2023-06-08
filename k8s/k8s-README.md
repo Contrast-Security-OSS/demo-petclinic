@@ -21,19 +21,15 @@ git clone https://github.com/Contrast-Security-OSS/demo-petclinic.git
 
 Inspect the `Dockerfile`, you should note a few sections where the Contrast agent is added:
 
-Line 11 fetches the latest Contrast Java agent.
+Line 9 fetches the latest Contrast Java agent.
 
 ```dockerfile
-# Add contrast sensor package
-RUN curl --fail --silent --location "https://repository.sonatype.org/service/local/artifact/maven/redirect?r=central-proxy&g=com.contrastsecurity&a=contrast-agent&v=LATEST" -o /opt/contrast/contrast.jar
-
+# Copy the required agent files from the official Contrast agent image.
+COPY --from=contrast/agent-java:latest /contrast/contrast-agent.jar /opt/contrast/contrast.jar
 ```
 
-Line 14 sets the JAVA_TOOL_OPTIONS to load our agent with the JVM.  Also note the `-Dcontrast.agent.java.standalone_app_name=spring-petclinic` parameter to set the application name along 
+Line 12 sets the JAVA_TOOL_OPTIONS to load our agent with the JVM.
 
-```dockerfile
-COPY --from=contrast /tmp/contrast /opt/contrast
-```
 
 For more details on adding the Contrast agent to your application/image. [See our docker guide on the subject](https://support.contrastsecurity.com/hc/en-us/articles/360056810771-Java-agent-with-Docker).
 
@@ -110,11 +106,11 @@ spec:
           mountPath: "/etc/contrast"
         resources:
           requests:
-            cpu: 1.0
-            memory: 2Gi
+            cpu: 0.5
+            memory: 0.5Gi
           limits:
-            cpu: 2.0
-            memory: 4Gi
+            cpu: 1.0
+            memory: 1Gi
       # Volume from contrast-security secret     
       volumes:
       - name: contrast-security
@@ -124,23 +120,7 @@ spec:
 
 4.  Add application level configurations to setup logging, pointer to the `contrast_security.yaml` and any desired name/environment updates. A full list of configurations options are provided in [our documentation here](https://docs.contrastsecurity.com/en/environment-variables.html)
 
-```yaml
-env:
-        - name: CONTRAST__APPLICATION__NAME
-          value: "petclinic-k8s"
-        - name: CONTRAST__SERVER__NAME
-          value: "EKS-Core-Pod"
-        - name: CONTRAST__SERVER__ENVIRONMENT
-          value: "QA"
-        - name: CONTRAST_CONFIG_PATH
-          value: "/etc/contrast/contrast_security.yaml"
-        - name: AGENT__LOGGER__STDOUT
-          value: "true"
-        - name: AGENT__LOGGER__LEVEL
-          value: "INFO"
-```
-
-**Optionally:** these could also be defined via configmaps
+In this example we'll do these via a configmap
 
 Create a file called `contrast.properties` with the same environmental variables defined.
 
