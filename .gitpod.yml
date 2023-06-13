@@ -5,18 +5,8 @@ image:
 # List the start up tasks. Learn more: https://www.gitpod.io/docs/configure/workspaces/tasks
 tasks:
   - name: Start SpringPetClinic
-    command: java -jar spring-petclinic-1.5.1.jar
-    
-  # - name: Download Contrast Agent, set configuration and start server
-  #   init: |
-  #     sdk install java 8.0.362-zulu
-  #     curl -L 'https://repository.sonatype.org/service/local/artifact/maven/redirect?r=central-proxy&g=com.contrastsecurity&a=contrast-agent&v=LATEST' -o contrast.jar
-  #     echo "Done downloading Contrast Agent"
-  #   command: java -javaagent:contrast.jar -Dcontrast.config.path=contrast_security.yaml -jar spring-petclinic-1.5.1.jar
-  
-  # - name: Docker Build and Run PetClinc from the docker-compose file
-  #   init: docker compose build 
-  #   command: docker compose up
+    init: ./mvnw clean install -U -DskipTests
+    command: ./mvnw spring-boot:run
 
 # List the ports to expose. Learn more: https://www.gitpod.io/docs/configure/workspaces/ports
 ports:
@@ -25,13 +15,14 @@ ports:
     port: 8080
     onOpen: open-preview
   
-  - name: petclinic-prod
-    description: Port 8081 for petclinic-prod running protect
-    port: 8081
-    onOpen: open-preview
+  # - name: petclinic-prod
+  #   description: Port 8081 for petclinic-prod running protect
+  #   port: 8081
+  #   onOpen: open-preview
 
 # Learn more from ready-to-use templates: https://www.gitpod.io/docs/introduction/getting-started/quickstart
 
 vscode:
   extensions: 
+    - pivotal.vscode-spring-boot
     - vscjava.vscode-java-pack
