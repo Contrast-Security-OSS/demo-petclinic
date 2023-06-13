@@ -2,7 +2,20 @@
 node_modules
 package-lock.json
 .idea/
+*.iml
 .vscode/
+.sdkmanrc
+
+# Ignore Java / Maven build files
+.classpath
+.project
+.settings/
+target/
+_site/
+/pom.maven
+/working/
+/bin/
+
 
 
 # Ignore terraform state files
@@ -14,5 +27,6 @@ terraform.tfvars
 
 # Ignore Contrast Security agent and config files
 contrast.jar
+contrast-agent.jar
 contrast_security.yaml
 contrast_security.prod.yaml
