@@ -12,6 +12,9 @@ services:
       dockerfile: Dockerfile
       target: contrast
     container_name: petclinic-dev
+    configs: 
+      - source: contrast_agent_config
+        target: /etc/contrast/java/contrast_security.yaml
     environment: 
         CONTRAST__SERVER__NAME: petclinic-dev-server
         CONTRAST__SERVER__ENVIRONMENT: Development
@@ -53,3 +56,8 @@ services:
 networks: 
   petclinic-network:
     name: petclinic-network
+
+configs: 
+  contrast_agent_config:
+    name: contrast_security.yaml
+    file: ./contrast_security.yaml
