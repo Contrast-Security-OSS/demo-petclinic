@@ -37,10 +37,10 @@ pipeline {
                                 -var 'session_metadata=branchName=qa,committer=Ryan,buildNumber=${env.BUILD_NUMBER}'
                             """
                         } catch (Exception e) {
-                            echo "Terraform refresh failed, deleting state"
-                            sh "rm -rf terraform.tfstate"
-                            currentBuild.result = "FAILURE"
-                            error("Aborting the build.")
+                            echo 'Terraform refresh failed, deleting state'
+                            sh 'rm -rf terraform.tfstate'
+                            currentBuild.result = 'FAILURE'
+                            error('Aborting the build.')
                         }
                     }
                 }
@@ -52,7 +52,7 @@ pipeline {
                     script {
                         waitUntil {
                             def r = sh returnStatus: true, script: "FQDN=\$(terraform output --raw fqdn); wget --retry-connrefused --tries=300 --waitretry=1 \$FQDN -O /dev/null"
-                            return (r == 0);
+                            return (r == 0)
                         }
                     }
                 }
@@ -82,35 +82,37 @@ pipeline {
                                 -var 'initials=$initials' \
                                 -var 'environment=development' \
                                 -var 'servername=Macbook-Pro' \
-                                -var 'session_metadata=branchName=feat: improve owner search,committer=Jake,buildNumber=${env.BUILD_NUMBER}'     
+                                -var 'session_metadata=branchName=feat: improve owner search,committer=Jake,buildNumber=${env.BUILD_NUMBER}'
                             """
                         } catch (Exception e) {
-                            echo "Terraform refresh failed, deleting state"
-                            sh "rm -rf terraform.tfstate"
-                            currentBuild.result = "FAILURE"
-                            error("Aborting the build.")
+                            echo 'Terraform refresh failed, deleting state'
+                            sh 'rm -rf terraform.tfstate'
+                            currentBuild.result = 'FAILURE'
+                            error('Aborting the build.')
                         }
                     }
                 }
             }
         }
-        stage('exercise - dev') {
+        stage('sleeping - qa') {
             steps {
                 timeout(5) {
                     script {
                         waitUntil {
                             def r = sh returnStatus: true, script: "FQDN=\$(terraform output --raw fqdn); wget --retry-connrefused --tries=300 --waitretry=1 \$FQDN -O /dev/null"
-                            return (r == 0);
-                        }
-                        catchError(buildResult: 'SUCCESS', stageResult: 'ABORTED') {
-                            timeout(5) {
-                                sh """
-                                FQDN=\$(terraform output --raw fqdn)
-                                BASEURL=\$FQDN npx playwright@1.32.1 test e2e/assess/*.ts
-                                """
-                            }
+                            return (r == 0)
                         }
                     }
+                }
+            }
+        }
+        stage('exercise - qa') {
+            steps {
+                timeout(5) {
+                    sh """
+                    FQDN=\$(terraform output --raw fqdn)
+                    BASEURL=\$FQDN npx playwright@1.32.1 test e2e/assess/*.ts
+                    """
                 }
             }
         }
@@ -128,11 +130,23 @@ pipeline {
                                 terraform apply -auto-approve -var 'location=$location' -var 'initials=$initials' -var 'environment=production' -var 'servername=Prod-01'
                                 """
                             } catch (Exception e) {
-                                echo "Terraform refresh failed, deleting state"
-                                sh "rm -rf terraform.tfstate"
-                                currentBuild.result = "FAILURE"
-                                error("Aborting the build.")
+                                echo 'Terraform refresh failed, deleting state'
+                                sh 'rm -rf terraform.tfstate'
+                                currentBuild.result = 'FAILURE'
+                                error('Aborting the build.')
                             }
+                        }
+                    }
+                }
+            }
+        }
+        stage('sleeping - prod') {
+            steps {
+                timeout(5) {
+                    script {
+                        waitUntil {
+                            def r = sh returnStatus: true, script: "FQDN=\$(terraform output --raw fqdn); wget --retry-connrefused --tries=300 --waitretry=1 \$FQDN -O /dev/null"
+                            return (r == 0)
                         }
                     }
                 }
@@ -141,20 +155,10 @@ pipeline {
         stage('exercise - prod') {
             steps {
                 timeout(5) {
-                    script {
-                        waitUntil {
-                            def r = sh returnStatus: true, script: "FQDN=\$(terraform output --raw fqdn); wget --retry-connrefused --tries=300 --waitretry=1 \$FQDN -O /dev/null"
-                            return (r == 0);
-                        }
-                        catchError(buildResult: 'SUCCESS', stageResult: 'ABORTED') {
-                            timeout(5) {
-                                sh """
-                                FQDN=\$(terraform output --raw fqdn)
-                                BASEURL=\$FQDN npx playwright@1.32.1 test e2e/protect/*.ts
-                                """
-                            }
-                        }
-                    }
+                    sh """
+                    FQDN=\$(terraform output --raw fqdn)
+                    BASEURL=\$FQDN npx playwright@1.32.1 test e2e/protect/*.ts
+                    """
                 }
             }
         }
