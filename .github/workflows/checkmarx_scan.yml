@@ -1,0 +1,34 @@
+name: Checkmarx Scan
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  checkmarx-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Checkmarx AST CLI Action
+        id: scan
+        uses: checkmarx/ast-github-action@main #Github Action version
+        with:
+          base_uri: https://ast.checkmarx.net/
+          cx_tenant: nfr_arctiq
+          cx_client_id: ${{ secrets.CX_CLIENT_ID }}
+          cx_client_secret: ${{ secrets.CX_CLIENT_SECRET }}
+
+      - name: Send output to file
+        run: echo $CONTENT >> checkmarx-report.txt
+        with:
+          CONTENT: ${{ steps.scan.outputs.cxcli }}
+
+      - name: Upload Checkmarx scan report
+        uses: actions/upload-artifact@v2
+        with:
+          name: checkmarx-report
+          path: checkmarx_report.txt
