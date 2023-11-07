@@ -58,7 +58,7 @@ pipeline {
                 }
             }
         }
-        stage('exercise - qa') {
+        stage('exercise') {
             steps {
                 timeout(5) {
                     sh """
@@ -94,7 +94,7 @@ pipeline {
                 }
             }
         }
-        stage('sleeping - qa') {
+        stage('sleeping - dev') {
             steps {
                 timeout(5) {
                     script {
@@ -106,7 +106,7 @@ pipeline {
                 }
             }
         }
-        stage('exercise - qa') {
+        stage('exercise - dev') {
             steps {
                 timeout(5) {
                     sh """
