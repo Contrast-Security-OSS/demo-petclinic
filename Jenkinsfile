@@ -16,8 +16,6 @@ pipeline {
                 sh '''
                 terraform init -upgrade
                 npm install playwright@1.42.1 -no-bin-links
-                // npm i @playwright/test@1.42.1 --no-bin-links --no-save
-                // npx playwright@1.42.1 install --with-deps chromium
                 '''
             }
         }
